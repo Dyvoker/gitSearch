@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.dyvoker.gitsearch.R;
 import com.dyvoker.gitsearch.core.GitRepositoryInfo;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -28,10 +29,12 @@ public class SearchResultAdapter  extends RecyclerView.Adapter<SearchResultAdapt
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        //TODO: use picasso library
-        //holder.userPicView.(dataset.get(position).fullName);
-        holder.repoNameView.setText(dataset.get(position).fullName);
-        holder.repoDescriptionView.setText(dataset.get(position).repoDescription);
+        GitRepositoryInfo info = dataset.get(position);
+        Picasso.with(holder.itemView.getContext())
+                .load(info.userPic)
+                .into(holder.userPicView);
+        holder.repoNameView.setText(info.fullName);
+        holder.repoDescriptionView.setText(info.repoDescription);
     }
 
     @Override
