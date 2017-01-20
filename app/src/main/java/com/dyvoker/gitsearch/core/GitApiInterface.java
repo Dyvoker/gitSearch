@@ -10,7 +10,7 @@ import retrofit2.http.Query;
 
 public interface GitApiInterface {
 
-    @GET("search/repositories")
+    @GET("search/repositories") //Get page of repositories by query from GitHub Api
     Call<GitRepositoryPage> getPage(@Query("q") String query,
                                     @Query("page") int page);
 }

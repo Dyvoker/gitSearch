@@ -1,8 +1,8 @@
 package com.dyvoker.gitsearch.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,15 +10,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.dyvoker.gitsearch.R;
-import com.dyvoker.gitsearch.core.GitApi;
 import com.dyvoker.gitsearch.core.GitHubService;
 import com.dyvoker.gitsearch.core.GitRepositoryPage;
 import com.dyvoker.gitsearch.core.SearchListener;
@@ -26,8 +24,11 @@ import com.dyvoker.gitsearch.core.SearchListener;
 public class SearchActivity extends AppCompatActivity
     implements SearchListener {
 
-    private GitHubService gitHubService = GitHubService.Instance;
+    private static final int ANIMATION_DURATION = 300;
 
+    private GitHubService gitHubService = GitHubService.INSTANCE;
+
+    private Toolbar myToolbar;
     private RecyclerView searchResultView;
     private final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
     private SearchResultAdapter searchResultAdapter;
@@ -38,7 +39,7 @@ public class SearchActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
         //Set up RecyclerView
@@ -49,7 +50,7 @@ public class SearchActivity extends AppCompatActivity
         searchResultAdapter = new SearchResultAdapter();
         searchResultAdapter.setOnClickListener(new SearchResultAdapter.OnClickListener() {
             @Override
-            public void onClick(SearchResultAdapter.ViewHolder viewHolder) {
+            public void onClick(SearchResultAdapter.ViewHolder viewHolder) { //Go to repository in browser
                 int position = viewHolder.getAdapterPosition();
                 String fullName = searchResultAdapter.getRepository(position).full_name;
                 String url = "https://www.github.com//" + fullName;
@@ -100,7 +101,9 @@ public class SearchActivity extends AppCompatActivity
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                MenuItemCompat.collapseActionView(searchMenuItem);
+                YoYo.with(Techniques.Pulse)
+                        .duration(ANIMATION_DURATION)
+                        .playOn(searchView);
                 gitHubService.setSearchQuery(query);
                 return true;
             }
@@ -111,6 +114,32 @@ public class SearchActivity extends AppCompatActivity
             }
         });
 
+        MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) { //SearchView expand
+                searchView.setVisibility(View.INVISIBLE);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                searchView.setVisibility(View.VISIBLE);
+                                YoYo.with(Techniques.SlideInRight)
+                                        .duration(ANIMATION_DURATION)
+                                        .playOn(myToolbar.getFocusedChild());
+                            }
+                        }, 10);
+                    }
+                });
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) { //SearchView collapse
+                return true;
+            }
+        });
         return true;
     }
 

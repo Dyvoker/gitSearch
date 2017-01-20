@@ -9,17 +9,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class GitApi {
 
-    public static final GitApiInterface Instance;
+    public static final GitApiInterface INSTANCE;
 
     private static final String BASE_URL = "https://api.github.com/";
 
     static {
-        //Instance = new TestGitApi();
+        //INSTANCE = new TestGitApi();
         //For test api: uncomment before and comment below
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        Instance = retrofit.create(GitApiInterface.class);
+        INSTANCE = retrofit.create(GitApiInterface.class);
     }
 }

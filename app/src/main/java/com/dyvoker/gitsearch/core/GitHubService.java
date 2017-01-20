@@ -12,7 +12,7 @@ import retrofit2.Response;
 
 public class GitHubService {
 
-    public static final GitHubService Instance = new GitHubService();
+    public static final GitHubService INSTANCE = new GitHubService();
 
     private ArrayList<GitRepositoryPage> pages = new ArrayList<>();
     private SearchListener searchListener;
@@ -26,7 +26,7 @@ public class GitHubService {
 
     public void loadNextPage() {
         if (getLoadedRepoCount() < totalCountForQuery) { //Don't load if all repositories for search request already loaded
-            GitApi.Instance.getPage(searchQuery, lastLoadedPage + 1).enqueue(new Callback<GitRepositoryPage>() {
+            GitApi.INSTANCE.getPage(searchQuery, lastLoadedPage + 1).enqueue(new Callback<GitRepositoryPage>() {
                 @Override
                 public void onResponse(Call<GitRepositoryPage> call, Response<GitRepositoryPage> response) {
                     if (response.body() == null) {
@@ -50,7 +50,7 @@ public class GitHubService {
 
     public void setSearchQuery(String searchQuery) {
         this.searchQuery = searchQuery;
-        GitApi.Instance.getPage(searchQuery, 1).enqueue(new Callback<GitRepositoryPage>() {
+        GitApi.INSTANCE.getPage(searchQuery, 1).enqueue(new Callback<GitRepositoryPage>() {
             @Override
             public void onResponse(Call<GitRepositoryPage> call, Response<GitRepositoryPage> response) {
                 lastLoadedPage = 1;
