@@ -8,16 +8,27 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dyvoker.gitsearch.R;
-import com.dyvoker.gitsearch.core.GitRepositoryInfo;
+import com.dyvoker.gitsearch.core.GitRepository;
+import com.dyvoker.gitsearch.core.GitRepositoryPage;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 public class SearchResultAdapter  extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder>  {
-    private ArrayList<GitRepositoryInfo> dataset;
+    private ArrayList<GitRepositoryPage> dataSet = new ArrayList<>();
 
-    public SearchResultAdapter(ArrayList<GitRepositoryInfo> dataset) {
-        this.dataset = dataset;
+    public void setGitRepositoryPages(ArrayList<GitRepositoryPage> newPages) {
+        if (newPages == null)
+            throw new NullPointerException();
+        dataSet = newPages;
+        notifyDataSetChanged();
+    }
+
+    public void addGitRepositoryPage(GitRepositoryPage newPage) {
+        if (newPage == null)
+            throw new NullPointerException();
+        dataSet.add(newPage);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -29,25 +40,56 @@ public class SearchResultAdapter  extends RecyclerView.Adapter<SearchResultAdapt
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        GitRepositoryInfo info = dataset.get(position);
+        GitRepository info = getRepository(position);
         Picasso.with(holder.itemView.getContext())
-                .load(info.userPic)
+                .load(info.owner.avatar_url)
                 .into(holder.userPicView);
-        holder.repoNameView.setText(info.fullName);
-        holder.repoDescriptionView.setText(info.repoDescription);
+        holder.repoNameView.setText(info.full_name);
+        holder.repoDescriptionView.setText(info.description);
+    }
+
+    private GitRepository getRepository(int position) {
+        int length = 0;
+        for (GitRepositoryPage x : dataSet){
+            if (position < length + x.items.length){
+                return x.items[position - length];
+            }
+            length += x.items.length;
+        }
+        throw new IndexOutOfBoundsException();
+    }
+
+    public GitRepositoryPage getRepositoryPage(int position)
+    {
+        int length = 0;
+        for (GitRepositoryPage x : dataSet){
+            if (position < length + x.items.length){
+                return x;
+            }
+            length += x.items.length;
+        }
+        throw new IndexOutOfBoundsException();
     }
 
     @Override
     public int getItemCount() {
-        return dataset.size();
+        int length = 0;
+        if (dataSet.size() > 0) {
+            for (GitRepositoryPage x : dataSet){
+                if (x.items != null) {
+                    length += x.items.length;
+                }
+            }
+        }
+        return length;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView userPicView;
-        public TextView repoNameView;
-        public TextView repoDescriptionView;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView userPicView;
+        TextView repoNameView;
+        TextView repoDescriptionView;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             userPicView = (ImageView) view.findViewById(R.id.userPicView);
             repoNameView = (TextView) view.findViewById(R.id.repoNameView);
