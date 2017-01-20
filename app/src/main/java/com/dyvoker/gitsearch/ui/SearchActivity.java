@@ -1,5 +1,8 @@
 package com.dyvoker.gitsearch.ui;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -7,10 +10,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Toast;
 
 import com.dyvoker.gitsearch.R;
+import com.dyvoker.gitsearch.core.GitApi;
 import com.dyvoker.gitsearch.core.GitHubService;
 import com.dyvoker.gitsearch.core.GitRepositoryPage;
 import com.dyvoker.gitsearch.core.SearchListener;
@@ -39,6 +47,17 @@ public class SearchActivity extends AppCompatActivity
         searchResultView.setLayoutManager(layoutManager);
 
         searchResultAdapter = new SearchResultAdapter();
+        searchResultAdapter.setOnClickListener(new SearchResultAdapter.OnClickListener() {
+            @Override
+            public void onClick(SearchResultAdapter.ViewHolder viewHolder) {
+                int position = viewHolder.getAdapterPosition();
+                String fullName = searchResultAdapter.getRepository(position).full_name;
+                String url = "https://www.github.com//" + fullName;
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
+            }
+        });
         searchResultView.setAdapter(searchResultAdapter);
         searchResultView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override

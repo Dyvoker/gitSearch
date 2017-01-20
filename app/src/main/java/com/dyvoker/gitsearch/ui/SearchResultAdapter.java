@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 public class SearchResultAdapter  extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder>  {
     private ArrayList<GitRepositoryPage> dataSet = new ArrayList<>();
+    private OnClickListener onClickListener;
 
     public void setGitRepositoryPages(ArrayList<GitRepositoryPage> newPages) {
         if (newPages == null)
@@ -48,7 +49,7 @@ public class SearchResultAdapter  extends RecyclerView.Adapter<SearchResultAdapt
         holder.repoDescriptionView.setText(info.description);
     }
 
-    private GitRepository getRepository(int position) {
+    public GitRepository getRepository(int position) {
         int length = 0;
         for (GitRepositoryPage x : dataSet){
             if (position < length + x.items.length){
@@ -84,7 +85,15 @@ public class SearchResultAdapter  extends RecyclerView.Adapter<SearchResultAdapt
         return length;
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public void setOnClickListener(OnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
+    }
+
+    public interface OnClickListener {
+        void onClick(ViewHolder viewHolder);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView userPicView;
         TextView repoNameView;
         TextView repoDescriptionView;
@@ -94,6 +103,15 @@ public class SearchResultAdapter  extends RecyclerView.Adapter<SearchResultAdapt
             userPicView = (ImageView) view.findViewById(R.id.userPicView);
             repoNameView = (TextView) view.findViewById(R.id.repoNameView);
             repoDescriptionView = (TextView) view.findViewById(R.id.repoDescriptionView);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (SearchResultAdapter.this.onClickListener != null) {
+                        SearchResultAdapter.this.onClickListener.onClick(ViewHolder.this);
+                    }
+                }
+            });
         }
     }
 }
